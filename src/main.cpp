@@ -46,16 +46,19 @@ void write_file (std::string output, double** m, int n)
 }
 void mult (double** m1, double** m2, double** m3, int n, int& t, std::mutex& mtx)
 {
-    mtx.lock();
-    int i = t / 4;
-    int j = t % 4;
-    ++t;
-    mtx.unlock();
-    if (i > 3 || j > 3) {
-        return;
-    }
-    for (int l = 0; l < n; ++l) {
-        m3[i][j] += m1[i][l] * m2[l][j];
+    int i = 0;
+    while (1) {
+        mtx.lock();
+        i = t / n;
+        int j = t % n;
+        ++t;
+        mtx.unlock();
+        if (i >= n) {
+            return;
+        }
+        for (int l = 0; l < n; ++l) {
+            m3[i][j] += m1[i][l] * m2[l][j];
+        }
     }
 }
 int main(int argc, char * argv[])
